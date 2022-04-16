@@ -94,6 +94,6 @@ export default class CodeEditor extends Vue {
 <style scoped lang="scss">
 div#editor {
   width: 100%;
-  height: 100%;
+  height: 80vh;
 }
 </style>

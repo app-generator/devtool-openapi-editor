@@ -51,14 +51,6 @@ export default class Dashboard extends Vue {
 <style scoped lang="scss">
 .v-container {
   margin-top: 5vh;
-  height: 90vh;
-  width: 100vw;
-  max-width: none;
-  .v-row {
-    height: 100%;
-    .v-col {
-      height: 100%;
-    }
-  }
+  width:100%;
 }
 </style>
