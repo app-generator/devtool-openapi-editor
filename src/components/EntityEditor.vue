@@ -20,7 +20,6 @@
       <v-expansion-panels>
         <FieldEditor
           v-for="field of fields"
-          :api="api"
           :entity="entity"
           :field="field"
           :key="field"
@@ -34,71 +33,55 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { OpenAPIObject, SchemaObject } from "openapi3-ts";
-import { PropType } from "vue";
 import FieldEditor from "./FieldEditor.vue";
 
 @Options({
   props: {
-    api: {
-      type: Object as PropType<OpenAPIObject>,
-      required: true,
-    },
     entity: {
       type: String,
       required: true,
     },
-    watch: {
-      api: {
-        handler: "onApiChanged",
-        deep: true,
-        immediate: true,
-      },
-    },
   },
-  emits: ["codeChange"],
   components: {
     FieldEditor,
   },
 })
 export default class EntityEditor extends Vue {
-  api!: OpenAPIObject;
   entity!: string;
 
   editedName: string = "";
-  editedEntity: SchemaObject = {};
-
-  get entities(): string[] {
-    return Object.keys(this.api.components!.schemas!);
-  }
-
-  get fields(): string[] {
-    if (this.editedEntity.properties) {
-      return Object.keys(this.editedEntity.properties!);
-    }
-    return [];
-  }
-
-  onApiChanged(updated: OpenAPIObject) {
-    this.editedEntity = updated.components!.schemas![this.entity];
-  }
-
+  editedEntity: SchemaObject = { properties: {} };
   async mounted() {
     if (this.entity !== "__new") {
       this.editedName = this.entity;
     }
-    this.editedEntity = this.api.components!.schemas![this.entity];
+    this.editedEntity = this.api.components!.schemas![this.entity]!;
+  }
+
+  get api(): OpenAPIObject {
+    return this.$store.state.api;
+  }
+
+  get entities(): string[] {
+    return Object.keys(this.api?.components!.schemas!);
+  }
+
+  get fields(): string[] {
+    const entity = this.api!.components!.schemas![this.entity] as SchemaObject;
+    return Object.keys(entity.properties!);
   }
 
   onEdit() {
     if (this.editedName && this.editedName !== this.entity) {
-      delete this.api.components!.schemas![this.entity];
-      this.api.components!.schemas![this.editedName!] = this.editedEntity;
+      delete this.api!.components!.schemas![this.entity];
     }
-    this.$emit("codeChange", this.api);
+    this.api!.components!.schemas![this.editedName!] = this.editedEntity;
+    this.$store.commit("update", this.api);
   }
 
   addField() {
     this.editedEntity.properties!.__new = {};
+    this.onEdit();
   }
 }
 </script>

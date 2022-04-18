@@ -5,10 +5,10 @@
   <v-container>
     <v-row>
       <v-col cols="6">
-        <VisualEditor :api="api" @codeChange="onEdit" />
+        <VisualEditor/>
       </v-col>
       <v-col cols="6">
-        <CodeEditor :api="api" @codeChange="onEdit" />
+        <CodeEditor/>
       </v-col>
     </v-row>
   </v-container>
@@ -16,7 +16,6 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { OpenAPIObject } from "openapi3-ts";
 import CodeEditor from "./CodeEditor.vue";
 import VisualEditor from "./VisualEditor.vue";
 
@@ -27,24 +26,7 @@ import VisualEditor from "./VisualEditor.vue";
     VisualEditor,
   },
 })
-export default class Dashboard extends Vue {
-  api: OpenAPIObject = {
-    openapi: "3.0.0",
-    info: {
-      title: "My New API",
-      version: "1.0.0",
-    },
-    paths: {},
-    components: {
-      schemas: {},
-      securitySchemes: {},
-    },
-  };
-
-  onEdit(event: any) {
-    this.api = event;
-  }
-}
+export default class Dashboard extends Vue {}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

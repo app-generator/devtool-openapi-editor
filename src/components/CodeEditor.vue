@@ -4,45 +4,31 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { OpenAPIObject } from "openapi3-ts";
 import loader from "@monaco-editor/loader";
 import Ajv from "ajv-draft-04";
-import { PropType } from "vue";
+import { OpenAPIObject } from "openapi3-ts";
 
 const schemaUrl =
   "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.0/schema.json";
 
-@Options({
-  props: {
-    api: {
-      type: Object as PropType<OpenAPIObject>,
-      required: true,
-    },
-  },
-  watch: {
-    api: {
-      handler: "onApiChanged",
-      deep: true,
-      immediate: true,
-    },
-  },
-  emits: ["codeChange"],
-})
+@Options({})
 export default class CodeEditor extends Vue {
-  api!: OpenAPIObject;
+  private monacoModel?: any;
 
   private apiTxt?: string;
 
-  private monacoModel?: any;
-
-  onApiChanged(updated: any) {
-    this.apiTxt = JSON.stringify(updated, null, "\t");
-    if (this.monacoModel) {
-      this.monacoModel.setValue(this.apiTxt);
-    }
-  }
-
   async mounted() {
+    this.apiTxt = JSON.stringify(this.$store.state.api, null, "\t");
+    this.$store.watch(
+      (state) => state.api,
+      (api) => {
+        this.apiTxt = JSON.stringify(api, null, "\t");
+        if (this.monacoModel) {
+          this.monacoModel.setValue(this.apiTxt);
+        }
+      }
+    );
+
     const schemaResponse = await fetch(schemaUrl);
     const schema = await schemaResponse.json();
     const monaco = await loader.init();
@@ -77,9 +63,9 @@ export default class CodeEditor extends Vue {
         const raw = this.monacoModel.getValue();
         if (raw !== this.apiTxt) {
           this.apiTxt = raw;
-          const data = JSON.parse(raw);
+          const data: OpenAPIObject = JSON.parse(raw);
           if (validate(data)) {
-            this.$emit("codeChange", data);
+            this.$store.commit("update", data);
           }
         }
       } catch (err) {

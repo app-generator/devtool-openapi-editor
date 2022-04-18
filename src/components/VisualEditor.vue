@@ -26,12 +26,23 @@
     <v-expansion-panel>
       <v-expansion-panel-title>Entities</v-expansion-panel-title>
       <v-expansion-panel-text>
-        <v-btn size="small" icon @click="addEntity()">
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
+        <v-row class="add-entity">
+          <v-btn size="small" v-if="showNew" icon @click="addEntity()">
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+          <v-text-field
+            v-if="!showNew"
+            v-model="newEntityName"
+            label="Entity Name"
+            variant="outlined"
+            required
+          ></v-text-field>
+          <v-btn size="small" v-if="!showNew" icon @click="saveNewEntity()">
+            <v-icon>mdi-check</v-icon>
+          </v-btn>
+        </v-row>
         <v-expansion-panels class="entities">
           <EntityEditor
-            :api="api"
             v-for="entity of entities"
             :key="entity"
             :entity="entity"
@@ -45,49 +56,42 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { OpenAPIObject } from "openapi3-ts";
-import { PropType } from "vue";
 import EntityEditor from "./EntityEditor.vue";
+import _ from "lodash";
 
 @Options({
-  props: {
-    api: {
-      type: Object as PropType<OpenAPIObject>,
-      required: true,
-    },
-  },
-  watch: {
-    api: {
-      handler: "onApiChanged",
-      deep: true,
-      immediate: true,
-    },
-  },
-  emits: ["codeChange"],
   components: {
     EntityEditor,
   },
 })
 export default class VisualEditor extends Vue {
-  api!: OpenAPIObject;
   displayed = "basic";
+  showNew: boolean = true;
+  newEntityName?: string;
 
-  onApiChanged(updated: OpenAPIObject) {
-    console.log(updated);
+  get api(): OpenAPIObject {
+    return this.$store.state.api;
   }
 
   get entities(): string[] {
-    return Object.keys(this.api.components!.schemas!);
+    return Object.keys(this.api?.components!.schemas!);
   }
 
-  addEntity() {
-    this.api.components!.schemas!.__new = {
+  saveNewEntity() {
+    this.api!.components!.schemas![this.newEntityName!] = {
       type: "object",
       properties: {},
     };
+    this.onEdit();
+    this.showNew = true;
+  }
+
+  addEntity() {
+    this.showNew = false;
   }
 
   onEdit() {
-    this.$emit("codeChange", this.api);
+    this.$store.commit("update", _.cloneDeep(this.api));
   }
 }
 </script>
@@ -102,5 +106,9 @@ span.title {
 }
 .entities {
   margin-top: 1rem;
+}
+.add-entity{
+  margin-top:1rem;
+  margin-bottom:1rem;
 }
 </style>
