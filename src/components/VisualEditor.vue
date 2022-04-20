@@ -24,30 +24,33 @@
       </v-expansion-panel-text>
     </v-expansion-panel>
     <v-expansion-panel>
-      <v-expansion-panel-title>Entities</v-expansion-panel-title>
+      <v-expansion-panel-title>
+        Entities
+        <v-btn size="small" v-if="showNew" icon @click="addEntity">
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
+      </v-expansion-panel-title>
       <v-expansion-panel-text>
-        <v-row class="add-entity">
-          <v-btn size="small" v-if="showNew" icon @click="addEntity()">
-            <v-icon>mdi-plus</v-icon>
-          </v-btn>
-          <v-text-field
-            v-if="!showNew"
-            v-model="newEntityName"
-            label="Entity Name"
-            variant="outlined"
-            required
-          ></v-text-field>
-          <v-btn size="small" v-if="!showNew" icon @click="saveNewEntity()">
-            <v-icon>mdi-check</v-icon>
-          </v-btn>
+        <v-row class="add-entity" v-if="!showNew">
+          <v-col cols="10">
+            <v-text-field
+              v-model="newEntityName"
+              label="Entity Name"
+              variant="outlined"
+              required
+            ></v-text-field>
+          </v-col>
+          <v-col cols="2">
+            <v-btn size="small" icon @click="saveNewEntity">
+              <v-icon>mdi-check</v-icon>
+            </v-btn>
+          </v-col>
         </v-row>
-        <v-expansion-panels class="entities">
-          <EntityEditor
-            v-for="entity of entities"
-            :key="entity"
-            :entity="entity"
-          />
-        </v-expansion-panels>
+        <EntityEditor
+          v-for="entity of entities"
+          :key="entity"
+          :entity="entity"
+        />
       </v-expansion-panel-text>
     </v-expansion-panel>
   </v-expansion-panels>
@@ -67,14 +70,16 @@ import _ from "lodash";
 export default class VisualEditor extends Vue {
   displayed = "basic";
   showNew: boolean = true;
-  newEntityName?: string;
+  newEntityName = "";
 
   get api(): OpenAPIObject {
     return this.$store.state.api;
   }
 
   get entities(): string[] {
-    return Object.keys(this.api?.components!.schemas!);
+    return Object.keys(this.api?.components!.schemas!).sort((a, b) =>
+      a.localeCompare(b)
+    );
   }
 
   saveNewEntity() {
@@ -86,7 +91,8 @@ export default class VisualEditor extends Vue {
     this.showNew = true;
   }
 
-  addEntity() {
+  addEntity(ev: any) {
+    ev.stopPropagation();
     this.showNew = false;
   }
 
@@ -107,8 +113,11 @@ span.title {
 .entities {
   margin-top: 1rem;
 }
-.add-entity{
-  margin-top:1rem;
-  margin-bottom:1rem;
+.add-entity {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+.v-btn {
+  margin-left: 1rem;
 }
 </style>

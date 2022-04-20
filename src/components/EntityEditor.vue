@@ -1,39 +1,83 @@
 <template>
-  <v-expansion-panel>
-    <v-expansion-panel-title>{{ editedName }}</v-expansion-panel-title>
-    <v-expansion-panel-text>
+  <v-card>
+    <v-card-title v-if="!showNameEditor">
+      <v-text>{{ editedName }}</v-text>
+      <v-btn size="small" icon @click="showNameEditor = true">
+        <v-icon>mdi-pencil</v-icon>
+      </v-btn>
+    </v-card-title>
+    <v-card-title v-else>
       <v-text-field
+        v-if="showNameEditor"
         v-model="editedName"
-        label="Entity name"
+        label="Entity Name"
         variant="outlined"
         required
-        @change="onEdit"
       ></v-text-field>
-      <v-banner one line>
-        <v-banner-text>Fields</v-banner-text>
-        <v-banner-actions>
-          <v-btn size="small" icon @click="addField()">
-            <v-icon>mdi-plus</v-icon>
-          </v-btn>
-        </v-banner-actions>
-      </v-banner>
-      <v-expansion-panels>
-        <FieldEditor
-          v-for="field of fields"
-          :entity="entity"
-          :field="field"
-          :key="field"
-          @codeChange="onEdit()"
-        />
-      </v-expansion-panels>
-    </v-expansion-panel-text>
-  </v-expansion-panel>
+      <v-btn v-if="showNameEditor" size="small" icon @click="changeName">
+        <v-icon>mdi-check</v-icon>
+      </v-btn>
+    </v-card-title>
+
+    <v-card-text>
+      <v-table>
+        <thead>
+          <tr>
+            <th class="text-left">Field Name</th>
+            <th class="text-left">Type</th>
+            <th>
+              <v-btn size="small" icon @click="addField()">
+                <v-icon>mdi-plus</v-icon>
+              </v-btn>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="field in fields" :key="field.name">
+            <td>
+              <span v-if="field.name !== editedField">{{ field.name }}</span>
+              <v-text-field
+                v-else
+                v-model="field.name"
+                label="Field Name"
+                variant="outlined"
+                required
+              ></v-text-field>
+            </td>
+            <td>
+              <span v-if="field.name !== editedField">{{ field.type }}</span>
+              <v-combobox
+                v-else
+                v-model="field.type"
+                :items="['string', 'number']"
+                label="Type"
+                variant="outlined"
+                dense
+              ></v-combobox>
+            </td>
+            <td>
+              <v-btn
+                v-if="editedField !== field.name"
+                size="small"
+                icon
+                @click="editedField = field.name"
+              >
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+              <v-btn v-else size="small" icon @click="saveField">
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+            </td>
+          </tr>
+        </tbody>
+      </v-table>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { OpenAPIObject, SchemaObject } from "openapi3-ts";
-import FieldEditor from "./FieldEditor.vue";
 
 @Options({
   props: {
@@ -42,20 +86,19 @@ import FieldEditor from "./FieldEditor.vue";
       required: true,
     },
   },
-  components: {
-    FieldEditor,
-  },
+  components: {},
 })
 export default class EntityEditor extends Vue {
   entity!: string;
+  showNameEditor = false;
 
   editedName: string = "";
-  editedEntity: SchemaObject = { properties: {} };
+  editedField?: string;
+
   async mounted() {
     if (this.entity !== "__new") {
       this.editedName = this.entity;
     }
-    this.editedEntity = this.api.components!.schemas![this.entity]!;
   }
 
   get api(): OpenAPIObject {
@@ -71,17 +114,28 @@ export default class EntityEditor extends Vue {
     return Object.keys(entity.properties!);
   }
 
-  onEdit() {
+  get editedEntity(): SchemaObject {
+    return this.api!.components!.schemas![this.entity];
+  }
+
+  changeName() {
     if (this.editedName && this.editedName !== this.entity) {
+      const movedEntity = { ...this.editedEntity };
       delete this.api!.components!.schemas![this.entity];
+      this.api!.components!.schemas![this.editedName!] = movedEntity;
+      this.save();
     }
-    this.api!.components!.schemas![this.editedName!] = this.editedEntity;
-    this.$store.commit("update", this.api);
+    this.showNameEditor = false;
   }
 
   addField() {
     this.editedEntity.properties!.__new = {};
-    this.onEdit();
+    this.editedField = "__new";
+    this.save();
+  }
+
+  save() {
+    this.$store.commit("update", this.api);
   }
 }
 </script>
@@ -93,5 +147,12 @@ export default class EntityEditor extends Vue {
 }
 span.title {
   margin-left: 1rem;
+}
+.v-btn {
+  margin: 1rem;
+  align-self: flex-start;
+}
+th:last-child {
+  width: 2rem;
 }
 </style>
