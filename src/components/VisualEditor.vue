@@ -47,9 +47,9 @@
           </v-col>
         </v-row>
         <EntityEditor
-          v-for="entity of entities"
-          :key="entity"
-          :entity="entity"
+          v-for="entity of api.entities"
+          :key="entity.name"
+          :entity="entity.name"
         />
       </v-expansion-panel-text>
     </v-expansion-panel>
@@ -58,9 +58,9 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { OpenAPIObject } from "openapi3-ts";
 import EntityEditor from "./EntityEditor.vue";
 import _ from "lodash";
+import { API } from "./model";
 
 @Options({
   components: {
@@ -72,21 +72,15 @@ export default class VisualEditor extends Vue {
   showNew: boolean = true;
   newEntityName = "";
 
-  get api(): OpenAPIObject {
+  get api(): API {
     return this.$store.state.api;
   }
 
-  get entities(): string[] {
-    return Object.keys(this.api?.components!.schemas!).sort((a, b) =>
-      a.localeCompare(b)
-    );
-  }
-
   saveNewEntity() {
-    this.api!.components!.schemas![this.newEntityName!] = {
-      type: "object",
-      properties: {},
-    };
+    this.api.entities.push({
+      name:this.newEntityName,
+      fields:[]
+    });
     this.onEdit();
     this.showNew = true;
   }

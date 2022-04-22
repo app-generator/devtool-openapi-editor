@@ -33,7 +33,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="field in fields" :key="field.name">
+          <tr v-for="field in editedEntity.fields" :key="field.name">
             <td>
               <span v-if="field.name !== editedField">{{ field.name }}</span>
               <v-text-field
@@ -77,7 +77,7 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { OpenAPIObject, SchemaObject } from "openapi3-ts";
+import { API, Entity } from "./model";
 
 @Options({
   props: {
@@ -101,35 +101,28 @@ export default class EntityEditor extends Vue {
     }
   }
 
-  get api(): OpenAPIObject {
+  get api(): API {
     return this.$store.state.api;
   }
 
-  get entities(): string[] {
-    return Object.keys(this.api?.components!.schemas!);
-  }
-
-  get fields(): string[] {
-    const entity = this.api!.components!.schemas![this.entity] as SchemaObject;
-    return Object.keys(entity.properties!);
-  }
-
-  get editedEntity(): SchemaObject {
-    return this.api!.components!.schemas![this.entity];
+  get editedEntity(): Entity | undefined {
+    return this.api!.entities.find((e) => e.name === this.entity);
   }
 
   changeName() {
-    if (this.editedName && this.editedName !== this.entity) {
-      const movedEntity = { ...this.editedEntity };
-      delete this.api!.components!.schemas![this.entity];
-      this.api!.components!.schemas![this.editedName!] = movedEntity;
+    if (
+      this.editedEntity &&
+      this.editedName &&
+      this.editedName !== this.entity
+    ) {
+      this.editedEntity.name = this.editedName;
       this.save();
     }
     this.showNameEditor = false;
   }
 
   addField() {
-    this.editedEntity.properties!.__new = {};
+    this.editedEntity?.fields.push({ name: "__new", type: "string" });
     this.editedField = "__new";
     this.save();
   }
