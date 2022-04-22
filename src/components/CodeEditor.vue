@@ -8,7 +8,7 @@ import { Options, Vue } from "vue-class-component";
 import loader from "@monaco-editor/loader";
 import Ajv from "ajv-draft-04";
 import { OpenAPIObject } from "openapi3-ts";
-import { toInternal } from "./model";
+import { toInternal, toOpenAPI } from "./model";
 
 const schemaUrl =
   "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.0/schema.json";
@@ -17,7 +17,7 @@ const schemaUrl =
 export default class CodeEditor extends Vue {
   private monacoModel?: any;
 
-  private apiTxt: string = '';
+  private apiTxt: string = "";
 
   get internal(): string {
     try {
@@ -27,22 +27,21 @@ export default class CodeEditor extends Vue {
         "\t"
       );
     } catch (err) {
-      console.error(err);
       return "";
     }
   }
 
   async mounted() {
-    this.apiTxt = JSON.stringify(this.$store.state.api, null, "\t");
-    // this.$store.watch(
-    //   (state) => state.api,
-    //   (api) => {
-    //     this.apiTxt = JSON.stringify(api, null, "\t");
-    //     if (this.monacoModel) {
-    //       this.monacoModel.setValue(this.apiTxt);
-    //     }
-    //   }
-    // );
+    this.apiTxt = JSON.stringify(toOpenAPI(this.$store.state.api), null, "\t");
+    this.$store.watch(
+      (state) => state.api,
+      (api) => {
+        this.apiTxt = JSON.stringify(toOpenAPI(api), null, "\t");
+        if (this.monacoModel) {
+          this.monacoModel.setValue(this.apiTxt);
+        }
+      }
+    );
 
     const schemaResponse = await fetch(schemaUrl);
     const schema = await schemaResponse.json();

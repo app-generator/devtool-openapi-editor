@@ -222,7 +222,8 @@ export const toOpenAPI = (internal: API): OpenAPIObject => {
         openapi: '3.0.0',
         info: {
             title: internal.name,
-            version: internal.version
+            version: internal.version,
+            description: internal.description
         },
         paths,
         components: {
@@ -270,4 +271,9 @@ export const toInternal = (api: OpenAPIObject): API => {
             }))
         })).sort((e1, e2) => e1.name.localeCompare(e2.name))
     }
+}
+
+export interface TreeModel extends Named {
+    value?: any;
+    children?: TreeModel[]
 }

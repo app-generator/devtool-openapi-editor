@@ -1,93 +1,67 @@
 <template>
-  <v-expansion-panels>
-    <v-expansion-panel>
-      <v-expansion-panel-title>API Information</v-expansion-panel-title>
-      <v-expansion-panel-text>
-        <v-row>
-          <v-col cols="12">
-            <v-text-field
-              v-model="api.info.title"
-              label="API Title"
-              variant="outlined"
-              required
-              @change="onEdit"
-            ></v-text-field>
-            <v-text-field
-              v-model="api.info.version"
-              label="Version"
-              variant="outlined"
-              required
-              @change="onEdit"
-            ></v-text-field>
-          </v-col>
-        </v-row>
-      </v-expansion-panel-text>
-    </v-expansion-panel>
-    <v-expansion-panel>
-      <v-expansion-panel-title>
-        Entities
-        <v-btn size="small" v-if="showNew" icon @click="addEntity">
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </v-expansion-panel-title>
-      <v-expansion-panel-text>
-        <v-row class="add-entity" v-if="!showNew">
-          <v-col cols="10">
-            <v-text-field
-              v-model="newEntityName"
-              label="Entity Name"
-              variant="outlined"
-              required
-            ></v-text-field>
-          </v-col>
-          <v-col cols="2">
-            <v-btn size="small" icon @click="saveNewEntity">
-              <v-icon>mdi-check</v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
-        <EntityEditor
-          v-for="entity of api.entities"
-          :key="entity.name"
-          :entity="entity.name"
-        />
-      </v-expansion-panel-text>
-    </v-expansion-panel>
-  </v-expansion-panels>
+  <Tree>
+    API Information
+    <template v-slot:children>
+      <Tree>
+        <span
+          >Title: <strong>{{ api.name }}</strong></span
+        >
+      </Tree>
+      <Tree>
+        <span
+          >Version: <strong>{{ api.version }}</strong></span
+        >
+      </Tree>
+      <Tree>
+        <span
+          >Description: <strong>{{ api.description }}</strong></span
+        >
+      </Tree>
+    </template>
+  </Tree>
+  <Tree>
+    Entities
+    <template v-slot:children>
+      <Tree v-for="entity of api.entities" :key="entity.name">
+        {{ entity.name }}
+        <template v-slot:children>
+          <Tree v-for="field of entity.fields" :key="field.name">
+            {{ field.name }}
+            <template v-slot:children>
+              <Tree>
+                <span
+                  >Name: <strong>{{ field.name }}</strong></span
+                >
+              </Tree>
+              <Tree>
+                <span
+                  >Type: <strong>{{ field.type }}</strong></span
+                >
+              </Tree>
+            </template>
+          </Tree>
+        </template>
+      </Tree>
+    </template>
+  </Tree>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import EntityEditor from "./EntityEditor.vue";
+import Tree from "./Tree.vue";
 import _ from "lodash";
 import { API } from "./model";
 
 @Options({
   components: {
+    Tree,
     EntityEditor,
   },
 })
 export default class VisualEditor extends Vue {
-  displayed = "basic";
-  showNew: boolean = true;
-  newEntityName = "";
-
   get api(): API {
     return this.$store.state.api;
-  }
-
-  saveNewEntity() {
-    this.api.entities.push({
-      name:this.newEntityName,
-      fields:[]
-    });
-    this.onEdit();
-    this.showNew = true;
-  }
-
-  addEntity(ev: any) {
-    ev.stopPropagation();
-    this.showNew = false;
   }
 
   onEdit() {

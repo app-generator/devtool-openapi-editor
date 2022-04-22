@@ -8,6 +8,7 @@ import '@mdi/font/css/materialdesignicons.css'
 import { createStore } from 'vuex'
 import { OpenAPIObject } from 'openapi3-ts'
 import _ from 'lodash'
+import { API } from './components/model'
 
 const app = createApp(App)
 const vuetify = createVuetify({
@@ -29,22 +30,17 @@ const vuetify = createVuetify({
 
 app.use(vuetify)
 
-const store = createStore<{ api: OpenAPIObject }>({
+const store = createStore<{ api: API }>({
   state() {
     return {
       api: {
-        openapi: "3.0.0",
-        info: {
-          title: "My New API",
-          version: "1.0.0",
-        },
-        paths: {},
-        components: {
-          schemas: {},
-          securitySchemes: {},
-        },
+        name: 'My API',
+        description: 'an OpenAPI REST descriptor',
+        version: '1.0.0',
+        entities:[],
+        paths:[]
       }
-    };
+    }
   },
   mutations: {
     update(state, update) {
