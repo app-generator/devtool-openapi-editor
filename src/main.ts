@@ -6,9 +6,8 @@ import App from './App.vue'
 import { theme as mainTheme } from './themes/main-theme'
 import '@mdi/font/css/materialdesignicons.css'
 import { createStore } from 'vuex'
-import { OpenAPIObject } from 'openapi3-ts'
 import _ from 'lodash'
-import { API } from './components/model'
+import { API } from './model'
 
 const app = createApp(App)
 const vuetify = createVuetify({

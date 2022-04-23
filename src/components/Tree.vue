@@ -1,6 +1,10 @@
 <template>
   <div class="tree-box">
-    <div class="tree-node">
+    <div
+      class="tree-node"
+      @mouseenter="showActions = true"
+      @mouseleave="showActions = false"
+    >
       <v-btn
         size="x-small"
         flat
@@ -9,7 +13,56 @@
         @click="expanded = !expanded"
       >
       </v-btn>
-      <slot></slot>
+      <span class="tree-node-label"><slot name="label"></slot></span>
+      <span class="tree-node-value" v-if="!editMode"
+        ><slot name="value"></slot
+      ></span>
+      <span class="tree-node-editor" v-else><slot name="editor"></slot></span>
+      <span class="tree-node-action-box">
+        <v-btn
+          v-if="showActions && showEdit && !editMode"
+          size="x-small"
+          flat
+          icon="mdi-form-textbox"
+          @click="
+            editMode = true;
+            $emit('edit');
+          "
+        ></v-btn>
+        <v-btn
+          v-if="showActions && showAdd"
+          size="x-small"
+          flat
+          icon="mdi-plus"
+          @click="expanded=true;$emit('add')"
+        ></v-btn>
+        <v-btn
+          v-if="showActions && showDelete && !editMode"
+          size="x-small"
+          flat
+          icon="mdi-trash-can-outline"
+        ></v-btn>
+        <v-btn
+          v-if="editMode"
+          size="x-small"
+          flat
+          icon="mdi-check"
+          @click="
+            editMode = false;
+            $emit('save');
+          "
+        ></v-btn>
+        <v-btn
+          v-if="editMode"
+          size="x-small"
+          flat
+          icon="mdi-close"
+          @click="
+            editMode = false;
+            $emit('cancel');
+          "
+        ></v-btn>
+      </span>
     </div>
     <div class="subtree-box" v-if="expanded">
       <slot name="children"></slot>
@@ -20,9 +73,21 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 
-@Options({})
+@Options({
+  props: {
+    showEdit: Boolean,
+    showDelete: Boolean,
+    showAdd: Boolean,
+  },
+})
 export default class Tree extends Vue {
   expanded = false;
+  showActions = false;
+  editMode = false;
+  showEdit?: boolean;
+  showDelete?: boolean;
+  showAdd?: boolean;
+
   get hasChildren(): boolean {
     return !!this.$slots.children;
   }
@@ -46,6 +111,20 @@ export default class Tree extends Vue {
 
     .v-btn {
       margin: 0.2rem;
+    }
+
+    .tree-node-label {
+      margin-right: 0.5rem;
+    }
+    .tree-node-value {
+      font-weight: 600;
+    }
+    .tree-node-action-box {
+      justify-self: flex-end;
+    }
+    .tree-node-editor {
+      flex-grow: 1;
+      margin-bottom: -2rem;
     }
   }
 

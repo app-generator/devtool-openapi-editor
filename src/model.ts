@@ -128,7 +128,7 @@ export interface API extends Named {
 
 const typeToOpenAPI = (internal: Typed): SchemaObject => {
     const openapiType = TypeMapping.find(t => t.internalType === internal.type)?.openapi || {
-        '$ref': `components/schemas/${internal.type}`
+        '$ref': `#/components/schemas/${internal.type}`
     };
     return internal.array ? {
         type: 'array',

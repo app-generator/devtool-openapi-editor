@@ -8,7 +8,7 @@ import { Options, Vue } from "vue-class-component";
 import loader from "@monaco-editor/loader";
 import Ajv from "ajv-draft-04";
 import { OpenAPIObject } from "openapi3-ts";
-import { toInternal, toOpenAPI } from "./model";
+import { toInternal, toOpenAPI } from "../model";
 
 const schemaUrl =
   "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.0/schema.json";
