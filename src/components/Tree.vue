@@ -41,6 +41,7 @@
           size="x-small"
           flat
           icon="mdi-trash-can-outline"
+          @click="$emit('delete')"
         ></v-btn>
         <v-btn
           v-if="editMode"

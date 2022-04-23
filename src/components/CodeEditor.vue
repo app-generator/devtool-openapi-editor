@@ -1,6 +1,5 @@
 <template>
   <div id="editor"></div>
-  <pre><code>{{internal}}</code></pre>
 </template>
 
 <script lang="ts">

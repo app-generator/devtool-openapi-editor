@@ -113,8 +113,10 @@ export interface Path {
     operations: Operation[];
 }
 
+export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete'
+
 export interface Operation extends Named {
-    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    method: HttpMethod;
     params?: Param[];
     requestBody?: RequestBody;
     responses: Response[];
