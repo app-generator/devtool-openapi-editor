@@ -62,6 +62,7 @@
         v-for="entity of api.entities"
         :key="entity.name"
         showDelete
+        :forceExpand="entity.name === forceExpandKey"
         @delete="deleteEntity(entity.name)"
       >
         <template v-slot:label> {{ entity.name }} </template>
@@ -92,6 +93,7 @@
               <Tree
                 v-for="field of entity.fields"
                 :key="field.name"
+                :forceExpand="field.name === forceExpandKey"
                 showDelete
                 @delete="deleteField(entity, field.name)"
               >
@@ -171,6 +173,7 @@
     <template v-slot:children>
       <Tree
         v-for="path of api.paths"
+        :forceExpand="path.path === forceExpandKey"
         :key="path.path"
         showDelete
         @delete="deletePath(path.path)"
@@ -202,6 +205,7 @@
             <template v-slot:children>
               <Tree
                 v-for="op of path.operations"
+                :forceExpand="op.name === forceExpandKey"
                 :key="op.method"
                 showDelete
                 @delete="deleteOperation(path, op.method)"
@@ -254,6 +258,7 @@
                     <template v-slot:children>
                       <Tree
                         v-for="param of op.params"
+                        :forceExpand="param.name === forceExpandKey"
                         :key="param.name"
                         showDelete
                         @delete="deleteParam(op, param.name)"
@@ -264,6 +269,7 @@
                             showEdit
                             @save="
                               param.name = editValue;
+                              forceExpandKey = param.name;
                               editValue = '';
                               onEdit();
                             "
@@ -326,9 +332,110 @@
                       </Tree>
                     </template>
                   </Tree>
-                </template>
-              </Tree> </template
-          ></Tree> </template></Tree></template
+                  <Tree showAdd @add="addResponse(op)">
+                    <template v-slot:label> Responses </template>
+                    <template v-slot:children>
+                      <Tree
+                        v-for="re of op.responses"
+                        :forceExpand="re.name === forceExpandKey"
+                        :key="re.name"
+                        showDelete
+                        @delete="deleteResponse(op, re.name)"
+                      >
+                        <template v-slot:label> {{ re.name }}</template>
+                        <template v-slot:children>
+                          <Tree
+                            showEdit
+                            @save="
+                              re.name = editValue;
+                              forceExpandKey = re.name;
+                              editValue = '';
+                              onEdit();
+                            "
+                            @cancel="editValue = ''"
+                            @edit="editValue = re.name"
+                          >
+                            <template v-slot:label> Response Code </template>
+                            <template v-slot:value>{{ re.name }}</template>
+                            <template v-slot:editor>
+                              <v-select
+                                v-model="editValue"
+                                density="compact"
+                                variant="outlined"
+                                :items="httpCodes"
+                              ></v-select>
+                            </template>
+                          </Tree>
+                          <Tree showAdd @add="addResponseContent(re)">
+                            <template v-slot:label> Content </template>
+                            <template v-slot:children>
+                              <Tree
+                                v-for="c of re.content"
+                                :forceExpand="c.mime === forceExpandKey"
+                                :key="c.mime"
+                                showDelete
+                                @delete="deleteResponseContent(re, c.mime)"
+                              >
+                                <template v-slot:label> {{ c.mime }}</template>
+                                <template v-slot:children>
+                                  <Tree
+                                    showEdit
+                                    @save="
+                                      c.mime = editValue;
+                                      editValue = '';
+                                      onEdit();
+                                    "
+                                    @cancel="editValue = ''"
+                                    @edit="editValue = c.mime"
+                                  >
+                                    <template v-slot:label>
+                                      Mime Type
+                                    </template>
+                                    <template v-slot:value>{{
+                                      c.mime
+                                    }}</template>
+                                    <template v-slot:editor>
+                                      <v-select
+                                        v-model="editValue"
+                                        density="compact"
+                                        variant="outlined"
+                                        :items="mimeTypes"
+                                      ></v-select>
+                                    </template>
+                                  </Tree>
+                                  <Tree
+                                    showEdit
+                                    @save="
+                                      c.type = editValue;
+                                      editValue = '';
+                                      onEdit();
+                                    "
+                                    @cancel="editValue = ''"
+                                    @edit="editValue = c.type"
+                                  >
+                                    <template v-slot:label> Type </template>
+                                    <template v-slot:value>{{
+                                      c.type
+                                    }}</template>
+                                    <template v-slot:editor>
+                                      <v-select
+                                        v-model="editValue"
+                                        density="compact"
+                                        variant="outlined"
+                                        :items="fieldTypes"
+                                      ></v-select>
+                                    </template>
+                                  </Tree>
+                                </template>
+                              </Tree>
+                            </template>
+                          </Tree>
+                        </template>
+                      </Tree>
+                    </template>
+                  </Tree> </template
+              ></Tree> </template></Tree></template
+      ></Tree> </template
   ></Tree>
 </template>
 
@@ -341,9 +448,9 @@ import {
   Entity,
   HttpCode,
   HttpMethod,
-  Named,
   Operation,
   Path,
+  Response,
   TypeMapping,
 } from "../model";
 
@@ -354,6 +461,7 @@ import {
 })
 export default class VisualEditor extends Vue {
   editValue: any = "";
+  forceExpandKey?: string;
 
   get api(): API {
     return this.$store.state.api;
@@ -364,10 +472,12 @@ export default class VisualEditor extends Vue {
   }
 
   addEntity() {
+    const name = `Entity_${this.api.entities.length + 1}`;
     this.api.entities.push({
       fields: [],
-      name: `Entity_${this.api.entities.length + 1}`,
+      name,
     });
+    this.forceExpandKey = name;
     this.onEdit();
   }
 
@@ -377,11 +487,13 @@ export default class VisualEditor extends Vue {
   }
 
   addField(entity: Entity) {
+    const name = `Field_${entity.fields.length + 1}`;
     entity.fields.push({
-      name: `Field_${entity.fields.length + 1}`,
+      name,
       type: "string",
       required: false,
     });
+    this.forceExpandKey = name;
     this.onEdit();
   }
 
@@ -391,10 +503,12 @@ export default class VisualEditor extends Vue {
   }
 
   addPath() {
+    const path = `/path_${this.api.paths.length + 1}`;
     this.api.paths.push({
-      path: `/path_${this.api.paths.length + 1}`,
+      path,
       operations: [],
     });
+    this.forceExpandKey = path;
     this.onEdit();
   }
 
@@ -404,24 +518,15 @@ export default class VisualEditor extends Vue {
   }
 
   addOperation(path: Path) {
+    const name = `Operation_${path.operations.length + 1}`;
     path.operations.push({
       method: "get",
-      name: `Operation_${path.operations.length + 1}`,
-      responses: [
-        {
-          name: "200",
-          description: "Default response",
-          content: [
-            {
-              mime: "application/json",
-              type: "string",
-            },
-          ],
-        },
-      ],
+      name,
+      responses: [],
       params: [],
       description: "A REST operation",
     });
+    this.forceExpandKey = name;
     this.onEdit();
   }
 
@@ -431,16 +536,49 @@ export default class VisualEditor extends Vue {
   }
 
   addParam(op: Operation) {
+    const name = `Param_${op.params!.length + 1}`;
     op.params!.push({
       in: "query",
-      name: `Param_${op.params!.length + 1}`,
+      name,
       type: "string",
     });
+    this.forceExpandKey = name;
     this.onEdit();
   }
 
   deleteParam(op: Operation, name: string) {
     op.params = op.params?.filter((p) => p.name !== name);
+    this.onEdit();
+  }
+
+  addResponse(op: Operation) {
+    const name = "200";
+    op.responses!.push({
+      name,
+      description: "Operation Response",
+      content: [],
+    });
+    this.forceExpandKey = name;
+    this.onEdit();
+  }
+
+  deleteResponse(op: Operation, name: string) {
+    op.responses = op.responses?.filter((p) => p.name !== name);
+    this.onEdit();
+  }
+
+  addResponseContent(re: Response) {
+    const mime = "application/json";
+    re.content!.push({
+      mime,
+      type: "string",
+    });
+    this.forceExpandKey = mime;
+    this.onEdit();
+  }
+
+  deleteResponsContent(re: Response, mime: string) {
+    re.content = re.content?.filter((p) => p.mime !== mime);
     this.onEdit();
   }
 
@@ -455,12 +593,19 @@ export default class VisualEditor extends Vue {
     return ["get", "post", "put", "patch", "delete"];
   }
 
-  get httpCodes(): Named[] {
-    return HttpCode;
+  get httpCodes(): {title:string,value:string}[] {
+    return HttpCode.map(c=>({
+      title: `${c.name} -- ${c.description}`,
+      value: c.name
+    }));
   }
 
   get paramInOptions(): string[] {
     return ["query", "header", "path", "cookie"];
+  }
+
+  get mimeTypes(): string[] {
+    return ["application/json", "application/xml", "text/pdf"];
   }
 }
 </script>

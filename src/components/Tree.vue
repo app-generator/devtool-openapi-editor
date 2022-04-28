@@ -79,15 +79,17 @@ import { Options, Vue } from "vue-class-component";
     showEdit: Boolean,
     showDelete: Boolean,
     showAdd: Boolean,
+    forceExpand: Boolean
   },
 })
 export default class Tree extends Vue {
-  expanded = false;
+  expanded = this.forceExpand;
   showActions = false;
   editMode = false;
   showEdit?: boolean;
   showDelete?: boolean;
   showAdd?: boolean;
+  forceExpand?: boolean;
 
   get hasChildren(): boolean {
     return !!this.$slots.children;

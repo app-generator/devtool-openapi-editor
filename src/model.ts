@@ -245,7 +245,7 @@ export const toInternal = (api: OpenAPIObject): API => {
         paths: Object.entries(api.paths).map(pkv => ({
             path: pkv[0],
             operations: Object.entries(pkv[1]).map((okv: [a: string, b: any]) => ({
-                method: okv[0].toUpperCase() as any,
+                method: okv[0] as any,
                 name: okv[1].operationId,
                 description: okv[1].description,
                 params: okv[1].parameters?.map((p: ParameterObject) => ({
