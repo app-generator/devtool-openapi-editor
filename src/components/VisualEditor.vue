@@ -332,6 +332,103 @@
                       </Tree>
                     </template>
                   </Tree>
+                  <Tree
+                    :showAdd="!op.requestBody"
+                    :showDelete="!!op.requestBody"
+                    @add="addRequestBody(op)"
+                    @delete="deleteRequestBody(op)"
+                  >
+                    <template v-slot:label> Request Body </template>
+                    <template v-slot:children>
+                      <Tree
+                        v-if="!!op.requestBody"
+                        showEdit
+                        @save="
+                          op.requestBody.description = editValue;
+                          editValue = '';
+                          onEdit();
+                        "
+                        @cancel="editValue = ''"
+                        @edit="editValue = op.requestBody.description"
+                      >
+                        <template v-slot:label> Description </template>
+                        <template v-slot:value>{{
+                          op.requestBody.description
+                        }}</template>
+                        <template v-slot:editor>
+                          <v-text-field
+                            v-model="editValue"
+                            density="compact"
+                            variant="outlined"
+                          ></v-text-field>
+                        </template>
+                      </Tree>
+                      <Tree
+                        v-if="!!op.requestBody"
+                        showAdd
+                        @add="addRequestBodyContent(op.requestBody)"
+                      >
+                        <template v-slot:label> Content </template>
+                        <template v-slot:children>
+                          <Tree
+                            v-for="c of op.requestBody.content"
+                            :forceExpand="c.mime === forceExpandKey"
+                            :key="c.mime"
+                            showDelete
+                            @delete="
+                              deleteRequestBodyContent(op.requestBody, c.mime)
+                            "
+                          >
+                            <template v-slot:label> {{ c.mime }}</template>
+                            <template v-slot:children>
+                              <Tree
+                                showEdit
+                                @save="
+                                  c.mime = editValue;
+                                  editValue = '';
+                                  onEdit();
+                                "
+                                @cancel="editValue = ''"
+                                @edit="editValue = c.mime"
+                              >
+                                <template v-slot:label> Mime Type </template>
+                                <template v-slot:value>{{ c.mime }}</template>
+                                <template v-slot:editor>
+                                  <v-select
+                                    v-model="editValue"
+                                    density="compact"
+                                    variant="outlined"
+                                    :items="mimeTypes"
+                                  ></v-select>
+                                </template>
+                              </Tree>
+                              <Tree
+                                showEdit
+                                @save="
+                                  c.type = editValue;
+                                  editValue = '';
+                                  onEdit();
+                                "
+                                @cancel="editValue = ''"
+                                @edit="editValue = c.type"
+                              >
+                                <template v-slot:label> Type </template>
+                                <template v-slot:value>{{ c.type }}</template>
+                                <template v-slot:editor>
+                                  <v-select
+                                    v-model="editValue"
+                                    density="compact"
+                                    variant="outlined"
+                                    :items="fieldTypes"
+                                  ></v-select>
+                                </template>
+                              </Tree>
+                            </template>
+                          </Tree>
+                        </template>
+                      </Tree>
+                    </template>
+                  </Tree>
                   <Tree showAdd @add="addResponse(op)">
                     <template v-slot:label> Responses </template>
                     <template v-slot:children>
@@ -450,6 +547,7 @@ import {
   HttpMethod,
   Operation,
   Path,
+  RequestBody,
   Response,
   TypeMapping,
 } from "../model";
@@ -577,8 +675,36 @@ export default class VisualEditor extends Vue {
     this.onEdit();
   }
 
-  deleteResponsContent(re: Response, mime: string) {
+  deleteResponseContent(re: Response, mime: string) {
     re.content = re.content?.filter((p) => p.mime !== mime);
+    this.onEdit();
+  }
+
+  addRequestBody(op: Operation) {
+    op.requestBody = {
+      description: "Request body",
+      content: [],
+    };
+    this.onEdit();
+  }
+
+  deleteRequestBody(op: Operation) {
+    op.requestBody = undefined;
+    this.onEdit();
+  }
+
+  addRequestBodyContent(rq: RequestBody) {
+    const mime = "application/json";
+    rq.content!.push({
+      mime,
+      type: "string",
+    });
+    this.forceExpandKey = mime;
+    this.onEdit();
+  }
+
+  deleteRequestBodyContent(rq: RequestBody, mime: string) {
+    rq.content = rq.content?.filter((p) => p.mime !== mime);
     this.onEdit();
   }
 
@@ -593,10 +719,10 @@ export default class VisualEditor extends Vue {
     return ["get", "post", "put", "patch", "delete"];
   }
 
-  get httpCodes(): {title:string,value:string}[] {
-    return HttpCode.map(c=>({
+  get httpCodes(): { title: string; value: string }[] {
+    return HttpCode.map((c) => ({
       title: `${c.name} -- ${c.description}`,
-      value: c.name
+      value: c.name,
     }));
   }
 

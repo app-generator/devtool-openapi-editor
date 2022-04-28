@@ -174,6 +174,17 @@ const requestBodyToInternal = (body: RequestBodyObject): RequestBody | undefined
     }
 }
 
+const requestBodyToOpenAPI = (body?: RequestBody): RequestBodyObject | undefined => {
+    if (!body) return undefined;
+    return {
+        description: body.description,
+        content: body.content.reduce((prev, curr) => {
+            prev[curr.mime] = { schema: typeToOpenAPI(curr) };
+            return prev;
+        }, {} as ContentObject)
+    }
+}
+
 
 export const toOpenAPI = (internal: API): OpenAPIObject => {
 
@@ -201,7 +212,8 @@ export const toOpenAPI = (internal: API): OpenAPIObject => {
                     required: p.required,
                     schema: typeToOpenAPI(p)
                 })),
-                responses
+                responses,
+                requestBody: requestBodyToOpenAPI(op.requestBody)
             }
         })
     });
