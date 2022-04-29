@@ -35,9 +35,12 @@ export default class CodeEditor extends Vue {
     this.$store.watch(
       (state) => state.api,
       (api) => {
-        this.apiTxt = JSON.stringify(toOpenAPI(api), null, "\t");
-        if (this.monacoModel) {
-          this.monacoModel.setValue(this.apiTxt);
+        const change = JSON.stringify(toOpenAPI(api), null, "\t");
+        if (change !== this.apiTxt) {
+          this.apiTxt = change;
+          if (this.monacoModel) {
+            this.monacoModel.setValue(this.apiTxt);
+          }
         }
       }
     );

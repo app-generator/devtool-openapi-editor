@@ -16,17 +16,14 @@
     "core-js": "^3.8.3",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
-    "material-design-icons-iconfont": "^6.6.0",
     "monaco-editor": "^0.33.0",
     "monaco-editor-webpack-plugin": "^7.0.1",
     "monaco-languageclient": "^0.18.1",
     "openapi3-ts": "^2.0.2",
-    "roboto-fontface": "*",
     "vue": "^3.2.13",
     "vue-class-component": "^8.0.0-0",
     "vuetify": "npm:@vuetify/nightly@next",
-    "vuex": "^4.0.2",
-    "webfontloader": "^1.0.0"
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
