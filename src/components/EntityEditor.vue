@@ -63,6 +63,26 @@
               <Tree
                 showEdit
                 @save="
+                  field.array = editValue;
+                  editValue = '';
+                  onEdit();
+                "
+                @cancel="editValue = ''"
+                @edit="editValue = field.array"
+              >
+                <template v-slot:label> Array </template>
+                <template v-slot:value>{{ field.array }}</template>
+                <template v-slot:editor>
+                  <v-checkbox
+                    v-model="editValue"
+                    density="compact"
+                    variant="outlined"
+                  ></v-checkbox>
+                </template>
+              </Tree>
+              <Tree
+                showEdit
+                @save="
                   field.type = editValue;
                   editValue = '';
                   onEdit();
@@ -139,6 +159,7 @@ export default class EntityEditor extends BaseEditor {
       name,
       type: "string",
       required: false,
+      array: false
     });
     this.onForceExpand(name);
     this.onEdit();

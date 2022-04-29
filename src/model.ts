@@ -227,6 +227,7 @@ export const toOpenAPI = (internal: API): OpenAPIObject => {
         })
         schemas[e.name] = {
             type: 'object',
+            required: e.fields.filter(f => f.required).map(f => f.name),
             properties
         };
 

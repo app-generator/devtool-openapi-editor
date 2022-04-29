@@ -51,6 +51,26 @@
       <Tree
         showEdit
         @save="
+          param.array = editValue;
+          editValue = '';
+          onEdit();
+        "
+        @cancel="editValue = ''"
+        @edit="editValue = param.array"
+      >
+        <template v-slot:label> Array </template>
+        <template v-slot:value>{{ param.array }}</template>
+        <template v-slot:editor>
+          <v-checkbox
+            v-model="editValue"
+            density="compact"
+            variant="outlined"
+          ></v-checkbox>
+        </template>
+      </Tree>
+      <Tree
+        showEdit
+        @save="
           param.type = editValue;
           editValue = '';
           onEdit();
@@ -67,6 +87,26 @@
             variant="outlined"
             :items="fieldTypes"
           ></v-select>
+        </template>
+      </Tree>
+      <Tree
+        showEdit
+        @save="
+          param.required = editValue;
+          editValue = '';
+          onEdit();
+        "
+        @cancel="editValue = ''"
+        @edit="editValue = param.required"
+      >
+        <template v-slot:label> Required </template>
+        <template v-slot:value>{{ param.required }}</template>
+        <template v-slot:editor>
+          <v-checkbox
+            v-model="editValue"
+            density="compact"
+            variant="outlined"
+          ></v-checkbox>
         </template>
       </Tree>
     </template>

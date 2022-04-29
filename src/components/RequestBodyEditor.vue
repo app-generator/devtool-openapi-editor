@@ -28,11 +28,7 @@
           ></v-text-field>
         </template>
       </Tree>
-      <Tree
-        v-if="!!op.requestBody"
-        showAdd
-        @add="addRequestBodyContent()"
-      >
+      <Tree v-if="!!op.requestBody" showAdd @add="addRequestBodyContent()">
         <template v-slot:label> Content </template>
         <template v-slot:children>
           <Tree
@@ -63,6 +59,26 @@
                     variant="outlined"
                     :items="mimeTypes"
                   ></v-select>
+                </template>
+              </Tree>
+              <Tree
+                showEdit
+                @save="
+                  c.array = editValue;
+                  editValue = '';
+                  onEdit();
+                "
+                @cancel="editValue = ''"
+                @edit="editValue = c.array"
+              >
+                <template v-slot:label> Array </template>
+                <template v-slot:value>{{ c.array }}</template>
+                <template v-slot:editor>
+                  <v-checkbox
+                    v-model="editValue"
+                    density="compact"
+                    variant="outlined"
+                  ></v-checkbox>
                 </template>
               </Tree>
               <Tree
@@ -129,6 +145,7 @@ export default class RequestBodyEditor extends BaseEditor {
     this.op.requestBody!.content!.push({
       mime,
       type: "string",
+      array: false
     });
     this.onForceExpand(mime);
     this.onEdit();

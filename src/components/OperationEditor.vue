@@ -111,6 +111,8 @@ export default class OperationEditor extends BaseEditor {
       in: "query",
       name,
       type: "string",
+      required: false,
+      array: false
     });
     this.onForceExpand(name);
     this.onEdit();
