@@ -29,21 +29,25 @@ const vuetify = createVuetify({
 
 app.use(vuetify)
 
-const store = createStore<{ api: API }>({
+const store = createStore<{ api: API, forceExpand: { key: string } }>({
   state() {
     return {
       api: {
         name: 'My API',
         description: 'an OpenAPI REST descriptor',
         version: '1.0.0',
-        entities:[],
-        paths:[]
-      }
+        entities: [],
+        paths: []
+      },
+      forceExpand: { key: '' }
     }
   },
   mutations: {
     update(state, update) {
       state.api = _.cloneDeep(update)
+    },
+    expand(state, key) {
+      state.forceExpand.key = key
     }
   }
 })
