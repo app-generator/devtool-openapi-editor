@@ -2,7 +2,7 @@
   <v-container>
     <v-row class="top-buttons">
       <v-btn @click="downloadJson()">Download JSON</v-btn>
-      <v-btn @click="downloadYaml()">Download YAML</v-btn>
+      <!-- <v-btn @click="downloadYaml()">Download YAML</v-btn> -->
     </v-row>
     <v-row>
       <v-col cols="6">
