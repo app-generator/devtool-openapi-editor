@@ -4,3 +4,12 @@
 ### Initial Release
 
 - Minimal version with `JSON Download`
+- Supported Entities/Fields:
+  - ✔️ `string`
+  - ✔️ `timestamp`
+  - ✔️ `UUID`
+  - ✔️ `binary`
+  - ✔️ `boolean`
+  - ✔️ `number`
+  - ✔️ `array`
+  - ✔️ `object` (all entities previously defined)
