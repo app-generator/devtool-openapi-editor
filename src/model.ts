@@ -205,6 +205,7 @@ export const toOpenAPI = (internal: API): OpenAPIObject => {
                 }
             })
             paths[p.path][op.method] = {
+                operationId: op.name,
                 parameters: op.params?.map(p => ({
                     in: p.in,
                     name: p.name,
