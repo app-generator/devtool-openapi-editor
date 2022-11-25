@@ -1,8 +1,10 @@
 <template>
   <v-container>
     <v-row class="top-buttons">
-      <v-btn @click="downloadJson()">Download JSON</v-btn>
-      <v-btn @click="downloadYaml()">Download YAML</v-btn>
+      <v-col cols="3">
+        <v-btn @click="downloadJson()">JSON</v-btn>
+        <v-btn @click="downloadYaml()">YAML</v-btn>
+      </v-col>  
     </v-row>
     <v-row>
       <v-col cols="6">
@@ -79,7 +81,7 @@ export default class Dashboard extends Vue {
 .top-buttons {
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: space-around;
 
   button{
     margin:2rem;
